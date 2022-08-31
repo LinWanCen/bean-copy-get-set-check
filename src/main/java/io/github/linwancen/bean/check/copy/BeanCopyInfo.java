@@ -26,11 +26,12 @@ public class BeanCopyInfo {
     }
 
     protected BeanCopyInfo init(ClassFiles classFiles, BiPredicate<String, Path> fileFilter) {
-        Map<String, Set<String>> copyMap = new LinkedHashMap<>();
         classFiles.getClassFileMap().forEach((className, path) -> {
             if (fileFilter != null && !fileFilter.test(className, path)) {
                 return;
             }
+
+            Map<String, Set<String>> copyMap = new LinkedHashMap<>();
             VarClassInfo varClassInfo = VarClassInfo.build(path, code -> {
                 Matcher m = copyPattern.matcher(code);
                 while (m.find()) {
