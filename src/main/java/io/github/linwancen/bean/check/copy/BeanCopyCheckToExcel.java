@@ -13,7 +13,7 @@ import java.io.File;
 import java.nio.file.Path;
 
 public class BeanCopyCheckToExcel extends BeanCopyCheck {
-    ExcelWriter writer;
+    ExcelWriter excelWriter;
     WriteSheet copySheet;
     WriteSheet otherSheet;
 
@@ -30,10 +30,12 @@ public class BeanCopyCheckToExcel extends BeanCopyCheck {
 
     public void scan(Path rootPath) {
         try (ExcelWriter w = ExcelUtils.excel("BeanCopyCheck")) {
-            writer = w;
-            copySheet = ExcelUtils.sheet(writer, 1, "copy", BeanCopyCheckLine.class);
-            otherSheet = ExcelUtils.sheet(writer, 2, "other", BeanCopyCheckOtherLine.class);
+            // Override method use it
+            excelWriter = w;
+            copySheet = ExcelUtils.sheet(excelWriter, 1, "copy", BeanCopyCheckLine.class);
+            otherSheet = ExcelUtils.sheet(excelWriter, 2, "other", BeanCopyCheckOtherLine.class);
             run(rootPath);
+            ExcelUtils.save(excelWriter);
         }
     }
 
@@ -41,14 +43,14 @@ public class BeanCopyCheckToExcel extends BeanCopyCheck {
     public void less(String copyClass, GetSetInfo fromInfo, GetSetMethodInfo toMethod) {
         BeanCopyCheckLine line = forNotFound(copyClass, fromInfo.getClassName(), toMethod.className);
         line.setToMethod(toMethod.methodName);
-        ExcelUtils.write(writer, copySheet, line);
+        ExcelUtils.write(excelWriter, copySheet, line);
     }
 
     @Override
     public void more(String copyClass, GetSetMethodInfo fromMethod, GetSetInfo toInfo) {
         BeanCopyCheckLine line = forNotFound(copyClass, fromMethod.className, toInfo.getClassName());
         line.setFromMethod(fromMethod.methodName);
-        ExcelUtils.write(writer, copySheet, line);
+        ExcelUtils.write(excelWriter, copySheet, line);
     }
 
     private BeanCopyCheckLine forNotFound(String copyClass, String fromClass, String forClass) {
@@ -65,6 +67,6 @@ public class BeanCopyCheckToExcel extends BeanCopyCheck {
         line.setClassName(className);
         line.setMethod(methodName);
         line.setVarName(varName);
-        ExcelUtils.write(writer, otherSheet, line);
+        ExcelUtils.write(excelWriter, otherSheet, line);
     }
 }

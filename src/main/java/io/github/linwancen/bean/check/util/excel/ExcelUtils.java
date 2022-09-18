@@ -27,18 +27,30 @@ public class ExcelUtils {
         return EasyExcelFactory.write(file).build();
     }
 
-    public static WriteSheet sheet(ExcelWriter writer, int sheetNo, String sheetName, Class<?> lineClass) {
+    public static WriteSheet sheet(ExcelWriter excelWriter, int sheetNo, String sheetName, Class<?> lineClass) {
         WriteSheet sheet = EasyExcelFactory
                 .writerSheet(sheetNo, sheetName)
                 .head(lineClass)
                 .registerWriteHandler(new FreezeAndFilter())
                 .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
                 .build();
-        writer.write(Collections.emptyList(), sheet);
+        excelWriter.write(Collections.emptyList(), sheet);
         return sheet;
     }
 
-    public static <T> void write(ExcelWriter writer, WriteSheet sheet, T line) {
-        writer.write(Collections.singletonList(line), sheet);
+    public static <T> void write(ExcelWriter excelWriter, WriteSheet sheet, T line) {
+        excelWriter.write(Collections.singletonList(line), sheet);
+    }
+
+    /**
+     * log file link
+     * and finish() for old version ExcelWriter not implements Closeable
+     */
+    public static void save(ExcelWriter excelWriter) {
+        excelWriter.finish();
+        File file = excelWriter.writeContext().writeWorkbookHolder().getFile();
+        if (LOG.isInfoEnabled()) {
+            LOG.info("file:///{}", file.getAbsolutePath().replace('\\', '/'));
+        }
     }
 }
